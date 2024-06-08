@@ -25,7 +25,7 @@ def get_current_playing_song(token):
             "Authorization": f"Bearer {token}"
         }
     )
-    if response.status_code == 204:
+    if response.status_code == 204 or response.json() == {}:
         return None
     return response.json()
 
@@ -82,19 +82,22 @@ if __name__ == "__main__":
     
     song_info = get_current_playing_song(spotify_token)
     if song_info:
-        song_name = song_info['item']['name']
-        artist_name = song_info['item']['artists'][0]['name']
-        
-        genius_token = get_genius_token()
-        song_search = search_genius_song(song_name, artist_name, genius_token)
-        
-        if song_search["response"]["hits"]:
-            song_id = song_search["response"]["hits"][0]["result"]["id"]
-            lyrics_url = get_lyrics_url(song_id, genius_token)
-            lyrics = scrape_lyrics(lyrics_url)
+        if 'item' in song_info:
+            song_name = song_info['item']['name']
+            artist_name = song_info['item']['artists'][0]['name']
             
-            update_readme(song_name, artist_name, lyrics)
+            genius_token = get_genius_token()
+            song_search = search_genius_song(song_name, artist_name, genius_token)
+            
+            if song_search["response"]["hits"]:
+                song_id = song_search["response"]["hits"][0]["result"]["id"]
+                lyrics_url = get_lyrics_url(song_id, genius_token)
+                lyrics = scrape_lyrics(lyrics_url)
+                
+                update_readme(song_name, artist_name, lyrics)
+            else:
+                print("Lyrics not found")
         else:
-            print("Lyrics not found")
+            print("No 'item' key in response")
     else:
         print("No song currently playing")
