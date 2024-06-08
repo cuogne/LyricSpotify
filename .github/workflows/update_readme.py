@@ -61,7 +61,7 @@ def update_readme(song_name, artist_name, lyrics):
   </a>
 </div>
 """
-
+    
     readme_content = f"""
 {spotify_widget}
 
